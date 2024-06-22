@@ -42,41 +42,32 @@ function SocketProvider({ children }: SocketProviderProps) {
   const [clientID, setClientID] = useState<string>('')
 
   /**
-   * Add event listeners to the client websocket (e.g. 'connected', 'connecting', 'disconnected')
+   * Unsubscribe from a specific orderbook channel
+   * @param symbol - specific symbol to indicate orderbook channel to be unsubscribed
   */
-  const addSocketListener = useCallback(() => {
-    centrifuge.on(ConnState.Connected, (context: ConnectedContext) => {
-      setConnState(ConnState.Connected)
-      setClientID(context.client)
-    })
-    centrifuge.on(ConnState.Connecting, () => {
-      setConnState(ConnState.Connecting)
-    })
-    centrifuge.on(ConnState.Disconnected, () => {
-      setConnState(ConnState.Disconnected)
-      setClientID('')
-      unsubscribeChannels()
-    })
-    centrifuge.on('error', (context: ErrorContext) => {
-      const { code } = context.error
-      if (code === 2) {
-        setConnState(ConnState.Disconnected)
-      }
-    })
+  const unsubscribeChannel = useCallback((symbol: string) => {
+    const subscription = centrifuge.getSubscription(`orderbook:${symbol}`)
+    if (subscription && subscription.state !== SubscriptionState.Unsubscribed) {
+      subscription.unsubscribe()
+      subscription.removeAllListeners()
+      centrifuge.removeSubscription(subscription)
+    }
   }, [])
 
   /**
-   * Remove event listeners from the client websocket
+   * Unsubscribe from all the public orderbook channels
   */
-  const removeSocketListener = () => {
-    centrifuge.removeAllListeners()
-  }
+  const unsubscribeChannels = useCallback(() => {
+    SYMBOLS.forEach(symbol => {
+      unsubscribeChannel(symbol)
+    })
+  }, [unsubscribeChannel])
 
   /**
    * Subscribe to the specific orderbook channel
    * @param symbol - specific symbol to indicate orderbook channel to be subscribed
    */
-  const subscribeChannel = (symbol: string) => {
+  const subscribeChannel = useCallback((symbol: string) => {
     const subscription = centrifuge.getSubscription(`orderbook:${symbol}`)
       || centrifuge.newSubscription(`orderbook:${symbol}`)
     if (subscription && subscription.state === SubscriptionState.Unsubscribed) {
@@ -102,7 +93,7 @@ function SocketProvider({ children }: SocketProviderProps) {
 
       subscription.subscribe()
     }
-  }
+  }, [orderbooks, unsubscribeChannel])
 
   /**
    * Subscribe to all the public orderbook channels
@@ -111,29 +102,38 @@ function SocketProvider({ children }: SocketProviderProps) {
     SYMBOLS.forEach(symbol => {
       subscribeChannel(symbol)
     })
-  }, [])
+  }, [subscribeChannel])
 
   /**
-   * Unsubscribe from a specific orderbook channel
-   * @param symbol - specific symbol to indicate orderbook channel to be unsubscribed
+   * Add event listeners to the client websocket (e.g. 'connected', 'connecting', 'disconnected')
   */
-  const unsubscribeChannel = (symbol: string) => {
-    const subscription = centrifuge.getSubscription(`orderbook:${symbol}`)
-    if (subscription && subscription.state !== SubscriptionState.Unsubscribed) {
-      subscription.unsubscribe()
-      subscription.removeAllListeners()
-      centrifuge.removeSubscription(subscription)
-    }
-  }
-
-  /**
-   * Unsubscribe from all the public orderbook channels
-  */
-  const unsubscribeChannels = useCallback(() => {
-    SYMBOLS.forEach(symbol => {
-      unsubscribeChannel(symbol)
+  const addSocketListener = useCallback(() => {
+    centrifuge.on(ConnState.Connected, (context: ConnectedContext) => {
+      setConnState(ConnState.Connected)
+      setClientID(context.client)
     })
-  }, [])
+    centrifuge.on(ConnState.Connecting, () => {
+      setConnState(ConnState.Connecting)
+    })
+    centrifuge.on(ConnState.Disconnected, () => {
+      setConnState(ConnState.Disconnected)
+      setClientID('')
+      unsubscribeChannels()
+    })
+    centrifuge.on('error', (context: ErrorContext) => {
+      const { code } = context.error
+      if (code === 2) {
+        setConnState(ConnState.Disconnected)
+      }
+    })
+  }, [unsubscribeChannels])
+
+  /**
+   * Remove event listeners from the client websocket
+  */
+  const removeSocketListener = () => {
+    centrifuge.removeAllListeners()
+  }
 
   useEffect(() => {
     if (centrifuge) {
