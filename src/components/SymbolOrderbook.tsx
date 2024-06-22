@@ -80,7 +80,7 @@ const SymbolOrderbook = ({
         askWidget.current.removeEventListener('scroll', handleAskScroll)
       }
     }
-  }, [loadBidsMore, loadAsksMore])
+  }, [bidWidget.current, askWidget.current, loadBidsMore, loadAsksMore])
 
   return <div className="max-w-[400px] shrink-0 w-full flex flex-col">
     <p className="text-center mb-2 font-medium">{symbol}</p>

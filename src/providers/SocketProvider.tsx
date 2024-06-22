@@ -147,7 +147,7 @@ function SocketProvider({ children }: SocketProviderProps) {
       removeSocketListener()
       centrifuge.disconnect()
     }
-  }, [centrifuge, addSocketListener, subscribeChannels, unsubscribeChannels])
+  }, [addSocketListener, subscribeChannels, unsubscribeChannels])
 
   useEffect(() => {
     if (connState === ConnState.Connected) {
