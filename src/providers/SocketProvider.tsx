@@ -93,7 +93,7 @@ function SocketProvider({ children }: SocketProviderProps) {
 
       subscription.subscribe()
     }
-  }, [orderbooks, unsubscribeChannel])
+  }, [])
 
   /**
    * Subscribe to all the public orderbook channels
@@ -126,7 +126,7 @@ function SocketProvider({ children }: SocketProviderProps) {
         setConnState(ConnState.Disconnected)
       }
     })
-  }, [unsubscribeChannels])
+  }, [])
 
   /**
    * Remove event listeners from the client websocket
