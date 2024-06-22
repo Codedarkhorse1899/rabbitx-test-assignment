@@ -77,7 +77,7 @@ function SocketProvider({ children }: SocketProviderProps) {
    * @param symbol - specific symbol to indicate orderbook channel to be subscribed
    */
   const subscribeChannel = (symbol: string) => {
-    let subscription = centrifuge.getSubscription(`orderbook:${symbol}`)
+    const subscription = centrifuge.getSubscription(`orderbook:${symbol}`)
       || centrifuge.newSubscription(`orderbook:${symbol}`)
     if (subscription && subscription.state === SubscriptionState.Unsubscribed) {
       subscription.on('subscribed', (context: SubscribedContext) => {
@@ -147,7 +147,7 @@ function SocketProvider({ children }: SocketProviderProps) {
       removeSocketListener()
       centrifuge.disconnect()
     }
-  }, [centrifuge])
+  }, [centrifuge, addSocketListener, subscribeChannels, unsubscribeChannels])
 
   useEffect(() => {
     if (connState === ConnState.Connected) {
