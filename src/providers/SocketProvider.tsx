@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react"
+import { createContext, useCallback, useEffect, useState } from "react"
 
 import centrifuge, {
   ConnectedContext,
@@ -44,7 +44,7 @@ function SocketProvider({ children }: SocketProviderProps) {
   /**
    * Add event listeners to the client websocket (e.g. 'connected', 'connecting', 'disconnected')
   */
-  const addSocketListener = () => {
+  const addSocketListener = useCallback(() => {
     centrifuge.on(ConnState.Connected, (context: ConnectedContext) => {
       setConnState(ConnState.Connected)
       setClientID(context.client)
@@ -63,7 +63,7 @@ function SocketProvider({ children }: SocketProviderProps) {
         setConnState(ConnState.Disconnected)
       }
     })
-  }
+  }, [])
 
   /**
    * Remove event listeners from the client websocket
@@ -107,11 +107,11 @@ function SocketProvider({ children }: SocketProviderProps) {
   /**
    * Subscribe to all the public orderbook channels
   */
-  const subscribeChannels = () => {
+  const subscribeChannels = useCallback(() => {
     SYMBOLS.forEach(symbol => {
       subscribeChannel(symbol)
     })
-  }
+  }, [])
 
   /**
    * Unsubscribe from a specific orderbook channel
@@ -129,11 +129,11 @@ function SocketProvider({ children }: SocketProviderProps) {
   /**
    * Unsubscribe from all the public orderbook channels
   */
-  const unsubscribeChannels = () => {
+  const unsubscribeChannels = useCallback(() => {
     SYMBOLS.forEach(symbol => {
       unsubscribeChannel(symbol)
     })
-  }
+  }, [])
 
   useEffect(() => {
     if (centrifuge) {
