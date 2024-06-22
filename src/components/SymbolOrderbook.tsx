@@ -37,7 +37,7 @@ const SymbolOrderbook = ({
 
   useEffect(() => {
     const config = { childList: true }
-    const bidWidgeNode = bidWidget.current
+    const bidWidgetNode = bidWidget.current
     const askWidgetNode = askWidget.current
 
     // Fetch load more bids callback when scrolls to the top of bids widget
@@ -75,14 +75,14 @@ const SymbolOrderbook = ({
     }
 
     return () => {
-      if (bidWidgeNode) {
-        bidWidgeNode.removeEventListener('scroll', handleBidScroll)
+      if (bidWidgetNode) {
+        bidWidgetNode.removeEventListener('scroll', handleBidScroll)
       }
       if (askWidgetNode) {
         askWidgetNode.removeEventListener('scroll', handleAskScroll)
       }
     }
-  }, [loadBidsMore, loadAsksMore])
+  }, [])
 
   return <div className="max-w-[400px] shrink-0 w-full flex flex-col">
     <p className="text-center mb-2 font-medium">{symbol}</p>
